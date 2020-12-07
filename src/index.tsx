@@ -1,17 +1,38 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+} from "react-router-dom";
+
+// import Hello from './containers/Hello';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
+import { enthusiasm } from './reducers/index';
+import { Header, LogIn, Home } from './components';
+
 import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+
+const store = createStore(enthusiasm, {
+  enthusiasmLevel: 1,
+  languageName: 'TypeScript',
+});
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+  <Provider store={store}>
+    <Router>
+      { Header }
+      
+      <Switch>
+        <Route exact path="/" children={<Home />} ></Route>
+        <Route exact path="/login" children={<LogIn registerFlag={false} />} ></Route>
+        <Route exact path="/register" children={<LogIn registerFlag={true} />} ></Route>
+        {/* <Route path="/deploy_election" children={<Deployer warning={<ConstructionWarning />} />} ></Route>
+        <Route path="/vote" children={<Finder warning={<ConstructionWarning />} />}  ></Route>
+        <Route path="/election/:id" children={<Election warning={<ConstructionWarning />} />} ></Route> */}
+      </Switch>
+    </Router>
+  </Provider>,
+  document.getElementById('root') as HTMLElement
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
