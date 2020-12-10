@@ -1,5 +1,8 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { useForm } from "react-hook-form";
+import { useHistory } from "react-router-dom";
+// import { RouteComponentProps} from "react-router-dom";
+import SimpleReactValidator from 'simple-react-validator'; 
 import axios from 'axios';
 
 import './LogIn.css'
@@ -9,9 +12,9 @@ interface LogInProps {
 }
 
 type userForm = {
-  username: string,
+  email: string,
   password: string,
-  email?: string,
+  username?: string,
 }
 
 type LogInPageResource = {
@@ -20,9 +23,13 @@ type LogInPageResource = {
   alternativeLink: JSX.Element,
 }
 
+
 export default function LogIn ({ registerFlag }: LogInProps) {
 
-  const { register, handleSubmit } = useForm<userForm>();
+  const { register, handleSubmit, getValues } = useForm<userForm>();
+  const [ responseMessage, setResponseMessage] = useState('');
+  const history = useHistory();
+  const validator = useRef(new SimpleReactValidator());
   const loginResources: LogInPageResource = {
     button: "login",
     postURL: "http://localhost:3000/login",
@@ -39,17 +46,40 @@ export default function LogIn ({ registerFlag }: LogInProps) {
     return <input type={type} placeholder={name} name={name} ref={register} />;
   }
 
+
   const onSubmit = (data: userForm) => {
-    axios.post(resource.postURL, { ...data });
+    
+    if (validator.current.allValid()) {
+      axios.post(resource.postURL, { ...data })
+        .then(() =>  history.push('/'))
+        .catch(error => {
+          if (error.response) {
+            const { status, data } = error.response;
+            setResponseMessage(`${status} - ${data.message}`);
+          } else 
+            setResponseMessage("Ops something went wrong!");
+        });
+    } else {
+      validator.current.showMessages();
+    }
   }
 
   return (
     <div className="login-page">
       <div className="form">
+        { (responseMessage)? <p className="server-response">{ responseMessage }</p> : null }
         <form className="login-form" onSubmit={handleSubmit(onSubmit)}>
-          { inputField("username") }
+          { inputField("email") }
+          <div className="input-error">
+            { validator.current.message("Invalid Email", getValues("email"), "required|email") }
+          </div>
+
           { inputField("password", "password") }
-          { (registerFlag)? inputField("email") : null }
+          <div className="input-error" >
+            { validator.current.message("Password must have at least 8 characters", getValues("password"), "required|min:8|max:32") }
+          </div>
+
+          { (registerFlag)? inputField("username") : null }
 
           <button type="submit">{ resource.button }</button>
           { resource.alternativeLink}

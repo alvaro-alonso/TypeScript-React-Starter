@@ -96,3 +96,17 @@
 .container .info span .fa {
     color: #EF3B3A;
 }
+
+.input-error {
+    color: #EF3B3A;
+    font-size: 10pt;
+}
+
+.server-response {
+    color: #9F6000;
+    border: 1px solid;
+    margin: 10px 0px;
+    padding: 15px;
+    background-repeat: no-repeat;
+    background-color: #FEEFB3;
+}
